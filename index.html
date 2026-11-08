@@ -224,7 +224,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
     <button class="x" id="closeBtn" aria-label="إغلاق">✕</button>
   </div>
   <div class="sheet-body">
-    <div class="ro-note" id="roNote" hidden>عرض فقط — ما عندك صلاحية تعديل هذه الصفحة.</div>
+    <div class="ro-note" id="roNote" hidden>مشاهدة فقط — التعديل متاح لصاحب المنصة.</div>
     <div class="field">
       <span class="lbl">الحالة</span>
       <div class="statuses" id="statusBtns"></div>
@@ -261,7 +261,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
     <p class="hint">البيانات محفوظة في JSONBin. المفتاح يتحفظ في هذا المتصفح بس، وما ينحفظ في الكود. كل شخص من الفريق يدخله مرة وحدة.</p>
     <div class="row2">
       <div class="field"><label for="sKeyType">نوع المفتاح</label>
-        <select id="sKeyType"><option value="master">Master Key</option><option value="access">Access Key</option></select></div>
+        <select id="sKeyType"><option value="master">Master Key — تعديل</option><option value="access">Access Key — مشاهدة فقط</option></select></div>
       <div class="field"><label for="sName">اسمك (يظهر في السجل)</label><input type="text" id="sName" placeholder="مثال: ماجد"></div>
     </div>
     <div class="field"><label for="sKey">المفتاح</label><input type="password" id="sKey" dir="ltr" autocomplete="off" placeholder="$2a$10$..."></div>
@@ -415,7 +415,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
   async function refresh(){
     if(!ready()){canWrite=false;setConn("warn","غير متصل — افتح الإعدادات وأدخل المفتاح");render();return}
     if(loading)return;loading=true;setConn("","جاري التحميل…");
-    try{const rec=await pull();canWrite=true;applyRec(rec);setConn("ok","متصل · آخر تحديث "+new Date().toLocaleTimeString("ar-SA-u-nu-latn",{hour:"2-digit",minute:"2-digit"}))}
+    try{const rec=await pull();canWrite=cfg.keyType!=="access";applyRec(rec);setConn("ok",(canWrite?"متصل":"مشاهدة فقط")+" · آخر تحديث "+new Date().toLocaleTimeString("ar-SA-u-nu-latn",{hour:"2-digit",minute:"2-digit"}))}
     catch(e){setConn("warn",e.message||"تعذّر الوصول للبيانات")}
     finally{loading=false}
   }
@@ -474,10 +474,12 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
 
   // ===== setup panel =====
   function openSetup(){
-    $("sKeyType").value=cfg.keyType||"master";$("sKey").value=cfg.key||"";$("sBin").value=cfg.bin||"";$("sName").value=cfg.name||"";$("sMsg").textContent="";
+    $("sKeyType").value=cfg.keyType||"master";$("sKey").value=cfg.key||"";$("sBin").value=cfg.bin||"";$("sName").value=cfg.name||"";$("sMsg").textContent="";syncSetupMode();
     $("setup").hidden=false;$("scrim").hidden=false;$("setupClose").focus();
   }
   function closeSetup(){$("setup").hidden=true;if(!openKey)$("scrim").hidden=true}
+  function syncSetupMode(){const v=$("sKeyType").value==="access";$("sCreate").hidden=v;$("sImport").closest(".field").hidden=v;}
+  $("sKeyType").addEventListener("change",syncSetupMode);
   function readForm(){cfg.keyType=$("sKeyType").value;cfg.key=$("sKey").value.trim();cfg.bin=$("sBin").value.trim();cfg.name=$("sName").value.trim();}
   $("setupBtn").addEventListener("click",openSetup);
   $("setupClose").addEventListener("click",closeSetup);
@@ -487,7 +489,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
   $("sSave").addEventListener("click",async()=>{
     readForm();if(!cfg.key||!cfg.bin){$("sMsg").textContent="أدخل المفتاح والـ Bin ID، أو اضغط إنشاء Bin جديد";return}
     saveCfg();$("sMsg").textContent="جاري الاتصال…";
-    try{const rec=await pull();canWrite=true;applyRec(rec);setConn("ok","متصل");$("sMsg").textContent="تم الاتصال ✓";setTimeout(closeSetup,700)}
+    try{const rec=await pull();canWrite=cfg.keyType!=="access";applyRec(rec);setConn("ok",canWrite?"متصل":"مشاهدة فقط");$("sMsg").textContent="تم الاتصال ✓";setTimeout(closeSetup,700)}
     catch(e){$("sMsg").textContent=e.message}
   });
   $("sCreate").addEventListener("click",async()=>{
