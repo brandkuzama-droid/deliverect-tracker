@@ -152,6 +152,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
 .pbtn:disabled{opacity:.5;cursor:default}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap}
 .hint{font-size:12.5px;color:var(--muted);margin:0}
+.creds{border:1px dashed var(--line);border-radius:12px;padding:12px;background:var(--bg)}
 .warnbox{font-size:13px;background:var(--st-prog-bg);color:var(--st-prog);padding:10px 12px;border-radius:10px}
 @media (max-width:820px){.summary{grid-template-columns:1fr}}
 @media (max-width:560px){
@@ -175,7 +176,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
       <div class="filter"><label for="branchSel">الفرع</label><select id="branchSel"></select></div>
       <div class="tools"><div class="conn" id="conn"><span class="dot"></span><span id="connText">جاري الاتصال…</span></div>
         <button type="button" class="tbtn" id="refreshBtn" aria-label="تحديث البيانات">↻ تحديث</button>
-        <button type="button" class="tbtn" id="setupBtn" aria-label="إعدادات الاتصال">⚙ الإعدادات</button></div>
+        <button type="button" class="tbtn" id="setupBtn" aria-label="دخول المحرر">🔒 دخول المحرر</button></div>
     </div>
   </header>
 
@@ -247,6 +248,13 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
       <div class="field"><label for="fStore">رقم الفرع في التطبيق</label><input type="text" id="fStore" class="num" dir="ltr" placeholder="Store ID"></div>
       <div class="field"><label for="fChannel">رقم القناة في ديليفركت</label><input type="text" id="fChannel" class="num" dir="ltr" placeholder="Channel link ID"></div>
     </div>
+    <div class="field creds" id="credsBox" hidden>
+      <span class="lbl">🔒 بيانات الدخول — تظهر لك بس</span>
+      <div class="row2">
+        <div class="field"><label for="cEmail">الإيميل / اسم المستخدم</label><input type="text" id="cEmail" dir="ltr" autocomplete="off"></div>
+        <div class="field"><label for="cPass">كلمة السر</label><input type="text" id="cPass" dir="ltr" autocomplete="off"></div>
+      </div>
+    </div>
     <div class="field"><label for="fNotes">ملاحظات</label><textarea id="fNotes" placeholder="مثال: أرسلنا الإيميل لمدير الحساب، ننتظر الرد"></textarea></div>
     <div class="saved" id="savedNote"></div>
   </div>
@@ -254,33 +262,34 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
 
 <aside class="sheet" id="setup" hidden dir="rtl" lang="ar" role="dialog" aria-modal="true" aria-labelledby="setupTitle">
   <div class="sheet-head">
-    <div><div class="crumb">الاتصال بـ JSONBin</div><h3 id="setupTitle" style="font-size:20px">الإعدادات</h3></div>
+    <div><div class="crumb">للتعديل فقط — المشاهدة ما تحتاج دخول</div><h3 id="setupTitle" style="font-size:20px">دخول المحرر</h3></div>
     <button class="x" id="setupClose" aria-label="إغلاق">✕</button>
   </div>
   <div class="sheet-body">
-    <p class="hint">البيانات محفوظة في JSONBin. المفتاح يتحفظ في هذا المتصفح بس، وما ينحفظ في الكود. كل شخص من الفريق يدخله مرة وحدة.</p>
+    <p class="hint">أي أحد يفتح الرابط يشوف التقدّم بدون دخول. للتعديل ولرؤية بيانات الدخول (الإيميلات وكلمات السر) أدخل Master Key حق JSONBin. المفتاح يتحفظ في هذا المتصفح بس.</p>
     <div class="row2">
-      <div class="field"><label for="sKeyType">نوع المفتاح</label>
-        <select id="sKeyType"><option value="master">Master Key — تعديل</option><option value="access">Access Key — مشاهدة فقط</option></select></div>
+      <div class="field"><label for="sKey">Master Key</label><input type="password" id="sKey" dir="ltr" autocomplete="off" placeholder="$2a$10$..."></div>
       <div class="field"><label for="sName">اسمك (يظهر في السجل)</label><input type="text" id="sName" placeholder="مثال: ماجد"></div>
     </div>
-    <div class="field"><label for="sKey">المفتاح</label><input type="password" id="sKey" dir="ltr" autocomplete="off" placeholder="$2a$10$..."></div>
-    <div class="field"><label for="sBin">Bin ID</label><input type="text" id="sBin" class="num" dir="ltr" autocomplete="off" placeholder="اتركه فاضي لإنشاء Bin جديد"></div>
+    <div class="row2">
+      <div class="field"><label for="sPub">Bin العام (المشاهدة)</label><input type="text" id="sPub" class="num" dir="ltr" autocomplete="off"></div>
+      <div class="field"><label for="sSec">Bin الخاص (كلمات السر)</label><input type="text" id="sSec" class="num" dir="ltr" autocomplete="off"></div>
+    </div>
     <div class="btnrow">
-      <button type="button" class="pbtn" id="sSave">حفظ والاتصال</button>
-      <button type="button" class="tbtn" id="sCreate">إنشاء Bin جديد</button>
+      <button type="button" class="pbtn" id="sSave">دخول</button>
+      <button type="button" class="tbtn" id="sCreate">إنشاء الـ Binين</button>
+      <button type="button" class="tbtn" id="sLogout">خروج</button>
     </div>
     <div class="saved" id="sMsg"></div>
     <div class="field" style="border-top:1px solid var(--line);padding-top:16px">
       <span class="lbl">نقل البيانات</span>
-      <p class="hint">استيراد ملف بيانات (JSON) يضيف الخانات الموجودة فيه ويحدّثها. التصدير ينزّل نسخة كاملة من البيانات الحالية.</p>
+      <p class="hint">الاستيراد يضيف الخانات وبيانات الدخول من الملف ويحدّثها. التصدير ينزّل نسخة كاملة تشمل بيانات الدخول.</p>
       <div class="btnrow">
         <label class="tbtn" for="sImport" style="display:inline-flex;align-items:center">استيراد ملف</label>
         <input type="file" id="sImport" accept="application/json,.json" hidden>
         <button type="button" class="tbtn" id="sExport">تصدير نسخة</button>
       </div>
     </div>
-    <div class="warnbox">انتبه: البيانات فيها إيميلات وكلمات سر. شارك المفتاح مع فريقك بس، وخلّ الـ Bin خاص (Private).</div>
   </div>
 </aside>
 
@@ -391,46 +400,61 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
       const el=$(id); el.disabled=!canWrite;
       if(full || (ae!==el && !pendingText[f])) el.value=d[f]||"";
     });
+    $("credsBox").hidden=!isEditor();
+    if(isEditor()){const c=creds[k]||{};[["cEmail","email"],["cPass","password"]].forEach(([id,f])=>{if(full||document.activeElement!==$(id))$(id).value=c[f]||""})}
     $("savedNote").textContent=d.updatedAt?"آخر تحديث: "+fmt(d.updatedAt):"";
   }
 
   // ===== JSONBin storage =====
+  // PUBLIC_BIN: readable by anyone (no secrets). Credentials live in the editor's private bin.
+  const PUBLIC_BIN="";
   const API="https://api.jsonbin.io/v3/b";
-  const CFG_KEY="deliverect-tracker-cfg";
+  const CFG_KEY="deliverect-tracker-editor";
   let cfg={};try{cfg=JSON.parse(localStorage.getItem(CFG_KEY)||"{}")||{}}catch(e){cfg={}}
   function saveCfg(){try{localStorage.setItem(CFG_KEY,JSON.stringify(cfg))}catch(e){}}
-  function hdrs(json){const h={};h[cfg.keyType==="access"?"X-Access-Key":"X-Master-Key"]=cfg.key;if(json)h["Content-Type"]="application/json";return h}
-  const ready=()=>!!(cfg.key&&cfg.bin);
-  async function pull(){
-    const r=await fetch(API+"/"+encodeURIComponent(cfg.bin)+"/latest",{headers:Object.assign(hdrs(),{"X-Bin-Meta":"false"}),cache:"no-store"});
-    if(!r.ok)throw new Error(r.status===401||r.status===403?"المفتاح غير صحيح أو ما عنده صلاحية على هذا الـ Bin":r.status===404?"الـ Bin غير موجود — تأكد من Bin ID":"خطأ "+r.status);
-    const rec=await r.json();return {links:(rec&&rec.links)||{},log:(rec&&rec.log)||[]};
+  const pubBin=()=>cfg.pub||PUBLIC_BIN;
+  const isEditor=()=>!!(cfg.key&&pubBin()&&cfg.sec);
+  let creds={};
+  async function getBin(id,withKey){
+    const h={"X-Bin-Meta":"false"};if(withKey)h["X-Master-Key"]=cfg.key;
+    const r=await fetch(API+"/"+encodeURIComponent(id)+"/latest",{headers:h,cache:"no-store"});
+    if(!r.ok)throw new Error(r.status===401||r.status===403?(withKey?"المفتاح غير صحيح":"الـ Bin العام مو مفتوح للمشاهدة"):r.status===404?"الـ Bin غير موجود":"خطأ "+r.status);
+    return await r.json();
   }
-  async function push(rec){
-    const r=await fetch(API+"/"+encodeURIComponent(cfg.bin),{method:"PUT",headers:Object.assign(hdrs(true),{"X-Bin-Versioning":"false"}),body:JSON.stringify(rec)});
+  async function putBin(id,rec){
+    const r=await fetch(API+"/"+encodeURIComponent(id),{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":cfg.key,"X-Bin-Versioning":"false"},body:JSON.stringify(rec)});
     if(!r.ok)throw new Error(r.status===401||r.status===403?"المفتاح ما عنده صلاحية تعديل":"خطأ "+r.status);
   }
+  const normPub=r=>({links:(r&&r.links)||{},log:(r&&r.log)||[]});
   function applyRec(rec){Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,rec.links);logs=(rec.log||[]).slice(0,30);render()}
   let loading=false;
   async function refresh(){
-    if(!ready()){canWrite=false;setConn("warn","غير متصل — افتح الإعدادات وأدخل المفتاح");render();return}
+    if(!pubBin()){canWrite=false;setConn("warn","المنصة لسا ما انربطت بالبيانات");render();return}
     if(loading)return;loading=true;setConn("","جاري التحميل…");
-    try{const rec=await pull();canWrite=cfg.keyType!=="access";applyRec(rec);setConn("ok",(canWrite?"متصل":"مشاهدة فقط")+" · آخر تحديث "+new Date().toLocaleTimeString("ar-SA-u-nu-latn",{hour:"2-digit",minute:"2-digit"}))}
-    catch(e){setConn("warn",e.message||"تعذّر الوصول للبيانات")}
+    try{
+      const rec=normPub(await getBin(pubBin(),isEditor()));
+      if(isEditor()){try{creds=((await getBin(cfg.sec,true))||{}).creds||{}}catch(e){creds={}}}
+      canWrite=isEditor();applyRec(rec);
+      setConn("ok",(canWrite?"محرر":"مشاهدة")+" · آخر تحديث "+new Date().toLocaleTimeString("ar-SA-u-nu-latn",{hour:"2-digit",minute:"2-digit"}));
+    }catch(e){setConn("warn",e.message||"تعذّر الوصول للبيانات")}
     finally{loading=false}
   }
-  // one write at a time: read latest, apply change, write back
   let writeQ=Promise.resolve();
   function commit(mutate){
-    writeQ=writeQ.then(async()=>{const rec=await pull();mutate(rec);rec.log=(rec.log||[]).slice(0,60);await push(rec);applyRec(rec);setConn("ok","متصل · تم الحفظ")});
+    writeQ=writeQ.then(async()=>{const rec=normPub(await getBin(pubBin(),true));mutate(rec);rec.log=rec.log.slice(0,60);await putBin(pubBin(),rec);applyRec(rec);setConn("ok","محرر · تم الحفظ")});
     return writeQ.catch(e=>{setConn("warn",e.message||"ما تم الحفظ");throw e});
+  }
+  let credQ=Promise.resolve();
+  function commitCreds(mutate){
+    credQ=credQ.then(async()=>{const r=(await getBin(cfg.sec,true))||{};r.creds=r.creds||{};mutate(r.creds);await putBin(cfg.sec,r);creds=r.creds});
+    return credQ;
   }
   function save(k,patch,logText){
     const prev=get(k);
     const next=Object.assign({},prev,patch,{brand:k.split("__")[0],branch:k.split("__")[1],app:k.split("__")[2],updatedAt:new Date().toISOString(),updatedBy:cfg.name||null});
     next.steps=Object.assign({},prev.steps||{},patch.steps||{});
     state[k]=next; render();
-    if(!ready()){$("savedNote").textContent="غير متصل — التغيير لن يُحفظ";return}
+    if(!isEditor()){$("savedNote").textContent="مشاهدة فقط — التغيير لن يُحفظ";return}
     if(openKey===k)$("savedNote").textContent="جاري الحفظ…";
     commit(rec=>{
       const cur=rec.links[k]||{};
@@ -441,6 +465,18 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
     }).then(()=>{if(openKey===k)$("savedNote").textContent="تم الحفظ"})
       .catch(e=>{if(openKey===k)$("savedNote").textContent="ما تم الحفظ — "+(e.message||"تأكد من الاتصال")});
   }
+  function saveCred(k,field,val){
+    if(!isEditor())return;
+    $("savedNote").textContent="جاري حفظ بيانات الدخول…";
+    commitCreds(c=>{c[k]=Object.assign({},c[k]||{},{[field]:val})})
+      .then(()=>{if(openKey===k)$("savedNote").textContent="تم حفظ بيانات الدخول"})
+      .catch(e=>{if(openKey===k)$("savedNote").textContent="ما تم الحفظ — "+(e.message||"")});
+  }
+  [["cEmail","email"],["cPass","password"]].forEach(([id,f])=>{
+    let t=null;
+    $(id).addEventListener("input",()=>{clearTimeout(t);t=setTimeout(()=>{const k=openKey;if(!k)return;const v=$(id).value;if(((creds[k]||{})[f]||"")!==v)saveCred(k,f,v)},900)});
+    $(id).addEventListener("blur",()=>{clearTimeout(t);const k=openKey;if(!k)return;const v=$(id).value;if(((creds[k]||{})[f]||"")!==v)saveCred(k,f,v)});
+  });
 
   $("statusBtns").addEventListener("click",e=>{const b=e.target.closest("button[data-s]");if(!b||!openKey||!canWrite)return;const s=b.dataset.s;if(get(openKey).status===s)return;save(openKey,{status:s},"الحالة: "+STATUS[s].ar)});
   $("stepList").addEventListener("change",e=>{const c=e.target.closest("input[data-step]");if(!c||!openKey)return;const st=STEPS.find(x=>x.id===c.dataset.step);
@@ -472,62 +508,67 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
   fromHash();
   render();
 
-  // ===== setup panel =====
+  // ===== editor sign-in panel =====
   function openSetup(){
-    $("sKeyType").value=cfg.keyType||"master";$("sKey").value=cfg.key||"";$("sBin").value=cfg.bin||"";$("sName").value=cfg.name||"";$("sMsg").textContent="";syncSetupMode();
+    $("sKey").value=cfg.key||"";$("sPub").value=pubBin();$("sSec").value=cfg.sec||"";$("sName").value=cfg.name||"";$("sMsg").textContent="";
+    $("sLogout").hidden=!isEditor();
     $("setup").hidden=false;$("scrim").hidden=false;$("setupClose").focus();
   }
   function closeSetup(){$("setup").hidden=true;if(!openKey)$("scrim").hidden=true}
-  function syncSetupMode(){const v=$("sKeyType").value==="access";$("sCreate").hidden=v;$("sImport").closest(".field").hidden=v;}
-  $("sKeyType").addEventListener("change",syncSetupMode);
-  function readForm(){cfg.keyType=$("sKeyType").value;cfg.key=$("sKey").value.trim();cfg.bin=$("sBin").value.trim();cfg.name=$("sName").value.trim();}
+  function readForm(){cfg.key=$("sKey").value.trim();cfg.pub=$("sPub").value.trim();cfg.sec=$("sSec").value.trim();cfg.name=$("sName").value.trim();if(cfg.pub===PUBLIC_BIN)delete cfg.pub}
   $("setupBtn").addEventListener("click",openSetup);
   $("setupClose").addEventListener("click",closeSetup);
   $("scrim").addEventListener("click",()=>{if(!$("setup").hidden)closeSetup()});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("setup").hidden)closeSetup()});
   $("refreshBtn").addEventListener("click",refresh);
   $("sSave").addEventListener("click",async()=>{
-    readForm();if(!cfg.key||!cfg.bin){$("sMsg").textContent="أدخل المفتاح والـ Bin ID، أو اضغط إنشاء Bin جديد";return}
-    saveCfg();$("sMsg").textContent="جاري الاتصال…";
-    try{const rec=await pull();canWrite=cfg.keyType!=="access";applyRec(rec);setConn("ok",canWrite?"متصل":"مشاهدة فقط");$("sMsg").textContent="تم الاتصال ✓";setTimeout(closeSetup,700)}
+    readForm();if(!cfg.key||!pubBin()||!cfg.sec){$("sMsg").textContent="أدخل المفتاح ورقمي الـ Bin، أو اضغط إنشاء الـ Binين";return}
+    $("sMsg").textContent="جاري التحقق…";
+    try{await getBin(cfg.sec,true);await getBin(pubBin(),true);saveCfg();await refresh();$("sMsg").textContent="تم الدخول ✓";setTimeout(closeSetup,700)}
     catch(e){$("sMsg").textContent=e.message}
   });
+  $("sLogout").addEventListener("click",()=>{const pub=cfg.pub;cfg={};if(pub)cfg.pub=pub;saveCfg();creds={};closeSetup();refresh()});
+  async function createBin(name,isPrivate,body){
+    const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":cfg.key,"X-Bin-Private":String(isPrivate),"X-Bin-Name":name},body:JSON.stringify(body)});
+    if(!r.ok)throw new Error(r.status===401?"المفتاح غير صحيح":"خطأ "+r.status);
+    return (await r.json()).metadata.id;
+  }
   $("sCreate").addEventListener("click",async()=>{
-    readForm();if(!cfg.key){$("sMsg").textContent="أدخل المفتاح أول";return}
-    if(cfg.keyType!=="master"){$("sMsg").textContent="إنشاء Bin يحتاج Master Key";return}
+    readForm();if(!cfg.key){$("sMsg").textContent="أدخل الـ Master Key أول";return}
     $("sMsg").textContent="جاري الإنشاء…";
     try{
-      const r=await fetch(API,{method:"POST",headers:Object.assign(hdrs(true),{"X-Bin-Private":"true","X-Bin-Name":"deliverect-tracker"}),body:JSON.stringify({links:{},log:[]})});
-      if(!r.ok)throw new Error(r.status===401?"المفتاح غير صحيح":"خطأ "+r.status);
-      const j=await r.json();cfg.bin=j.metadata.id;$("sBin").value=cfg.bin;saveCfg();
-      $("sMsg").textContent="تم إنشاء Bin جديد: "+cfg.bin+" — احفظ هذا الرقم وشاركه مع الفريق";
+      if(!pubBin())cfg.pub=await createBin("deliverect-tracker-public",false,{links:{},log:[]});
+      if(!cfg.sec)cfg.sec=await createBin("deliverect-tracker-private",true,{creds:{}});
+      $("sPub").value=pubBin();$("sSec").value=cfg.sec;saveCfg();
+      $("sMsg").textContent="تم ✓ — Bin العام: "+pubBin()+" · أرسل هذا الرقم لـ Claude يثبّته في المنصة عشان يشوفها الكل";
       await refresh();
     }catch(e){$("sMsg").textContent=e.message}
   });
   $("sImport").addEventListener("change",async e=>{
     const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;
-    if(!ready()){$("sMsg").textContent="اتصل أول قبل الاستيراد";return}
+    if(!isEditor()){$("sMsg").textContent="ادخل كمحرر أول";return}
     try{
-      const data=JSON.parse(await f.text());const links=data.links||data;
+      const data=JSON.parse(await f.text());const links=data.links||{};const cr=data.creds||{};
       const n=Object.keys(links).filter(k=>k.split("__").length===3).length;
-      if(!n)throw new Error("الملف ما فيه بيانات خانات");
+      if(!n&&!Object.keys(cr).length)throw new Error("الملف ما فيه بيانات");
       $("sMsg").textContent="جاري الاستيراد…";
-      await commit(rec=>{Object.keys(links).forEach(k=>{if(k.split("__").length===3)rec.links[k]=Object.assign({},rec.links[k]||{},links[k])});
+      if(n)await commit(rec=>{Object.keys(links).forEach(k=>{if(k.split("__").length===3)rec.links[k]=Object.assign({},rec.links[k]||{},links[k])});
         rec.log.unshift({key:"",label:"استيراد",text:"تم استيراد "+n+" خانة",at:new Date().toISOString(),by:cfg.name||null})});
-      $("sMsg").textContent="تم استيراد "+n+" خانة ✓";
+      if(Object.keys(cr).length)await commitCreds(c=>{Object.keys(cr).forEach(k=>{c[k]=Object.assign({},c[k]||{},cr[k])})});
+      $("sMsg").textContent="تم استيراد "+n+" خانة و"+Object.keys(cr).length+" بيانات دخول ✓";
     }catch(err){$("sMsg").textContent="ما تم الاستيراد — "+(err.message||"")}
   });
   $("sExport").addEventListener("click",()=>{
-    const blob=new Blob([JSON.stringify({links:state,log:logs},null,2)],{type:"application/json"});
+    const blob=new Blob([JSON.stringify({links:state,creds:isEditor()?creds:{},log:logs},null,2)],{type:"application/json"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="deliverect-tracker-"+new Date().toISOString().slice(0,10)+".json";
     document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
   });
 
   // load + light auto-refresh while the tab is visible
   refresh();
-  if(!ready())openSetup();
-  setInterval(()=>{if(document.visibilityState==="visible"&&ready()&&!openKey)refresh()},120000);
-  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&ready())refresh()});
+  if(!pubBin())openSetup();
+  setInterval(()=>{if(document.visibilityState==="visible"&&pubBin()&&!openKey)refresh()},120000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&pubBin())refresh()});
 })();
 </script>
 </body>
