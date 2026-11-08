@@ -173,7 +173,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
       <p>ربط فروع شاهان وميسور وشهرزاد مع ٥ تطبيقات توصيل عبر ديليفركت — اختر فرع أو اعرض الكل، واضغط أي خانة لتحديثها.</p></div>
     </div>
     <div style="display:grid;gap:8px;justify-items:end">
-      <div class="filter"><label for="branchSel">الفرع</label><select id="branchSel"></select></div>
+      <div class="filter"><label for="branchSel">عرض</label><select id="branchSel"></select></div>
       <div class="tools"><div class="conn" id="conn"><span class="dot"></span><span id="connText">جاري الاتصال…</span></div>
         <button type="button" class="tbtn" id="refreshBtn" aria-label="تحديث البيانات">↻ تحديث</button>
         <button type="button" class="tbtn" id="setupBtn" aria-label="دخول المحرر">🔒 دخول المحرر</button></div>
@@ -307,7 +307,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
   ];
   const brandAr=id=>(BRANDS.find(x=>x.id===id)||{}).ar||id;
   let sel="all";
-  const rows=()=>sel==="all"?BRANCHES:BRANCHES.filter(r=>r.id===sel);
+  const rows=()=>sel==="all"?BRANCHES:sel.startsWith("b:")?BRANCHES.filter(r=>r.brand===sel.slice(2)):BRANCHES.filter(r=>r.id===sel);
   const APPS=[{id:"jahez",ar:"جاهز",en:"Jahez"},{id:"hungerstation",ar:"هنقرستيشن",en:"HungerStation"},{id:"keeta",ar:"كيتا",en:"Keeta"},{id:"ninja",ar:"نينجا",en:"Ninja"},{id:"thechefz",ar:"ذا شيفز",en:"The Chefz"}];
   const STEPS=[
     {id:"s1",t:"طلب الربط من التطبيق",d:"مراسلة مدير الحساب لتفعيل الربط مع ديليفركت"},
@@ -348,9 +348,11 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
     // brand cards
     const groups=sel==="all"
       ? BRANDS.map(b=>({name:b.ar,ds:BRANCHES.filter(r=>r.brand===b.id).flatMap(r=>APPS.map(a=>get(keyOf(r.id,a.id)))),sub:BRANCHES.filter(r=>r.brand===b.id).length+" فرع"}))
-      : APPS.map(a=>({name:a.ar,ds:[get(keyOf(sel,a.id))],sub:"",logo:LOGOS[a.id]}));
-    $("brandsH").textContent=sel==="all"?"تقدّم كل براند":"تقدّم الفرع في كل تطبيق";
-    $("brandCards").style.gridTemplateColumns=sel==="all"?"":"repeat(auto-fill,minmax(120px,1fr))";
+      : rows().length>1
+        ? rows().map(r=>({name:r.ar,ds:APPS.map(a=>get(keyOf(r.id,a.id))),sub:APPS.length+" تطبيقات"}))
+        : APPS.map(a=>({name:a.ar,ds:[get(keyOf(rows()[0].id,a.id))],sub:"",logo:LOGOS[a.id]}));
+    $("brandsH").textContent=sel==="all"?"تقدّم كل براند":rows().length>1?"تقدّم كل فرع — "+brandAr(rows()[0].brand):"تقدّم الفرع في كل تطبيق";
+    $("brandCards").style.gridTemplateColumns=sel==="all"?"":rows().length>1?"repeat(auto-fill,minmax(150px,1fr))":"repeat(auto-fill,minmax(120px,1fr))";
     $("brandCards").innerHTML=groups.map(g=>{
       const ds=g.ds;
       const segs=Object.keys(STATUS).filter(k=>k!=="none").map(k=>{const n=ds.filter(d=>d.status===k).length;return n?`<span style="width:${n/ds.length*100}%;background:var(${STATUS[k].col})"></span>`:""}).join("");
@@ -501,9 +503,13 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openKey)closeSheet()});
 
   $("dlLogo").src=LOGOS.deliverect;
-  $("branchSel").innerHTML='<option value="all">كل الفروع</option>'+BRANDS.map(b=>`<optgroup label="${b.ar}">${BRANCHES.filter(r=>r.brand===b.id).map(r=>`<option value="${r.id}">${b.ar} — ${r.ar}</option>`).join("")}</optgroup>`).join("");
-  function fromHash(){const h=location.hash.slice(1).replace("-","__");sel=BRANCHES.some(r=>r.id===h)?h:"all";$("branchSel").value=sel}
-  $("branchSel").addEventListener("change",e=>{sel=e.target.value;try{history.replaceState(null,"",sel==="all"?location.pathname+location.search:"#"+sel.replace("__","-"))}catch(_){location.hash=sel==="all"?"":sel.replace("__","-")}render()});
+  $("branchSel").innerHTML='<option value="all">كل الفروع</option>'+BRANDS.map(b=>`<optgroup label="${b.ar}"><option value="b:${b.id}">${b.ar} — كل الفروع</option>${BRANCHES.filter(r=>r.brand===b.id).map(r=>`<option value="${r.id}">${b.ar} — ${r.ar}</option>`).join("")}</optgroup>`).join("");
+  const toHash=v=>v==="all"?"":v.startsWith("b:")?"brand-"+v.slice(2):v.replace("__","-");
+  function fromHash(){const raw=location.hash.slice(1);let v="all";
+    if(raw.startsWith("brand-")){const b=raw.slice(6);if(BRANDS.some(x=>x.id===b))v="b:"+b}
+    else{const h=raw.replace("-","__");if(BRANCHES.some(r=>r.id===h))v=h}
+    sel=v;$("branchSel").value=sel}
+  $("branchSel").addEventListener("change",e=>{sel=e.target.value;const h=toHash(sel);try{history.replaceState(null,"",h?"#"+h:location.pathname+location.search)}catch(_){location.hash=h}render()});
   window.addEventListener("hashchange",()=>{fromHash();render()});
   fromHash();
   render();
