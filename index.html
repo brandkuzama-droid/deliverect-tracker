@@ -285,9 +285,9 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
       <span class="lbl">نقل البيانات</span>
       <p class="hint">الاستيراد يضيف الخانات وبيانات الدخول من الملف ويحدّثها. التصدير ينزّل نسخة كاملة تشمل بيانات الدخول.</p>
       <div class="btnrow">
-        <label class="tbtn" for="sImport" style="display:inline-flex;align-items:center">استيراد ملف</label>
+        <label class="pbtn" for="sImport" style="display:inline-flex;align-items:center">⬆ استيراد ملف</label>
         <input type="file" id="sImport" accept="application/json,.json" hidden>
-        <button type="button" class="tbtn" id="sExport">تصدير نسخة</button>
+        <button type="button" class="tbtn" id="sExport">⬇ تصدير نسخة احتياطية</button>
       </div>
     </div>
   </div>
@@ -512,6 +512,8 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
   function openSetup(){
     $("sKey").value=cfg.key||"";$("sPub").value=pubBin();$("sSec").value=cfg.sec||"";$("sName").value=cfg.name||"";$("sMsg").textContent="";
     $("sLogout").hidden=!isEditor();
+    $("sExport").disabled=!isEditor();
+    $("sMsg").textContent=isEditor()?"أنت داخل كمحرر ✓":"الخطوة ١: الصق المفتاح واضغط «إنشاء الـ Binين» — الخطوة ٢: استيراد ملف";
     $("setup").hidden=false;$("scrim").hidden=false;$("setupClose").focus();
   }
   function closeSetup(){$("setup").hidden=true;if(!openKey)$("scrim").hidden=true}
@@ -530,7 +532,7 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
   $("sLogout").addEventListener("click",()=>{const pub=cfg.pub;cfg={};if(pub)cfg.pub=pub;saveCfg();creds={};closeSetup();refresh()});
   async function createBin(name,isPrivate,body){
     const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json","X-Master-Key":cfg.key,"X-Bin-Private":String(isPrivate),"X-Bin-Name":name},body:JSON.stringify(body)});
-    if(!r.ok)throw new Error(r.status===401?"المفتاح غير صحيح":"خطأ "+r.status);
+    if(!r.ok){let m="";try{m=(await r.json()).message||""}catch(_){}throw new Error((r.status===401?"المفتاح غير صحيح":"خطأ "+r.status)+(m?" — "+m:""))}
     return (await r.json()).metadata.id;
   }
   $("sCreate").addEventListener("click",async()=>{
@@ -542,11 +544,11 @@ tbody th .br{display:block;font-family:var(--f-body);font-weight:500;font-size:1
       $("sPub").value=pubBin();$("sSec").value=cfg.sec;saveCfg();
       $("sMsg").textContent="تم ✓ — Bin العام: "+pubBin()+" · أرسل هذا الرقم لـ Claude يثبّته في المنصة عشان يشوفها الكل";
       await refresh();
-    }catch(e){$("sMsg").textContent=e.message}
+    }catch(e){$("sMsg").textContent="⚠ "+(e.message||"تعذّر الاتصال بـ JSONBin")}
   });
   $("sImport").addEventListener("change",async e=>{
     const f=e.target.files&&e.target.files[0];e.target.value="";if(!f)return;
-    if(!isEditor()){$("sMsg").textContent="ادخل كمحرر أول";return}
+    if(!isEditor()){$("sMsg").textContent="⚠ ما تم الاستيراد: لازم تدخل كمحرر أول (المفتاح + إنشاء الـ Binين)";return}
     try{
       const data=JSON.parse(await f.text());const links=data.links||{};const cr=data.creds||{};
       const n=Object.keys(links).filter(k=>k.split("__").length===3).length;
